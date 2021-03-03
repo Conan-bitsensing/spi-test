@@ -78,7 +78,8 @@ void print_usage(void)
 	       "      -d,--device dev: name of the spi device node\n"
 	       "      -l,--length len: length of spi transaction(bytes)\n"
 	       "      -m,--mosi mosi: hex value to be transmitted\n"
-	       "      -s,--speed speed: speed of the transaction in Hz\n\n"
+	       "      -s,--speed speed: speed of the transaction in Hz\n"
+		   "      -c,--change change speed: change speed of the transaction in Hz\n\n"
 	       "EX: spi_test -d /dev/spidev0.0 -l 4 -m 12AB\n\n"
 	       "Note: mosi will be padded or truncated\n"
 	       "      to the length speficied.\n"
@@ -102,17 +103,20 @@ int main(int argc, char *argv[])
 	int c;
 	int fd;
 	int ret;
+	int check_changeHz = 0;
+	int changeHz;
 
 	static struct option long_opts[] = {
 		{ "device", required_argument, 0, 'd' },
 		{ "length", required_argument, 0, 'l' },
 		{ "mosi", required_argument, 0, 'm' },
 		{ "speed", required_argument, 0, 's' },
+		{ "change", required_argument, 0, 'c' },
 		{ "help", no_argument, 0, '?' },
 		{ 0, 0, 0, 0 },
 	};
 
-	while ((c = getopt_long(argc, argv, "d:l:m:s:?",
+	while ((c = getopt_long(argc, argv, "d:l:m:s:c?",
 				long_opts, &opt_i)) != -1) {
 		switch (c) {
 		case 'd':
@@ -127,6 +131,9 @@ int main(int argc, char *argv[])
 		case 's':
 			tr.speed_hz = atoi(optarg);
 			break;
+		case 'c':
+			check_changeHz = 1;
+			break;	
 		case '?':
 			print_usage();
 			return 0;
@@ -148,14 +155,54 @@ int main(int argc, char *argv[])
 
 	string2hex(mosi_str, mosi, tr.len);
 
-	printf("Sending to %s at %ld Hz\n", device_name, tr.speed_hz);
+	printf("Sending to %s at %ld Hz\n", device_name, tr.speed_hz);	
+	
+	//send first
+	//for(int i=0; i<10000; i++)
+	{
+		ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
+		if (ret == -1)
+		{
+			fprintf(stderr, "main: ioctl SPI_IOC_MESSAGE: %s: %s\n",
+				device_name, strerror(errno));
+			return ret;
+		}
+		// else
+		// 	print_spi_transaction(miso, mosi, tr.len);
 
-	ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
-	if (ret == -1)
-		fprintf(stderr, "main: ioctl SPI_IOC_MESSAGE: %s: %s\n",
-			device_name, strerror(errno));
-	else
-		print_spi_transaction(miso, mosi, tr.len);
+		if(check_changeHz)
+		{
+			sleep(5);
+			changeHz = tr.speed_hz * 2;	
+			tr.speed_hz = changeHz;
+			// ret = ioctl(fd, SPI_IOC_WR_MAX_SPEED_HZ, &changeHz); 
+			// if (ret < 0)
+			// {
+			// 	fprintf(stderr, "main: ioctl SPI_IOC_WR_MAX_SPEED_HZ: %s: %s\n",
+			// 			device_name, strerror(errno));
+			// }
+
+			ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
+			if (ret == -1)
+			{
+				fprintf(stderr, "main: ioctl SPI_IOC_MESSAGE: %s: %s\n",
+					device_name, strerror(errno));
+				return ret;
+			}
+			// else
+			// 	print_spi_transaction(miso, mosi, tr.len);
+
+			//changeHz = tr.speed_hz / 2;	
+			//tr.speed_hz = changeHz;
+			// ret = ioctl(fd, SPI_IOC_WR_MAX_SPEED_HZ, &changeHz); 
+			// if (ret < 0)
+			// {
+			// 	fprintf(stderr, "main: ioctl SPI_IOC_WR_MAX_SPEED_HZ: %s: %s\n",
+			// 			device_name, strerror(errno));
+			// }
+		}
+	}
+
 
 	close(fd);
 
