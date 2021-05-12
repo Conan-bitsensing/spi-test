@@ -91,12 +91,151 @@ int main(int argc, char *argv[])
 {
 	__u8 miso[MAX_LENGTH];
 	__u8 mosi[MAX_LENGTH];
-	struct spi_ioc_transfer tr = {
-		.tx_buf = (unsigned long)mosi,
-		.rx_buf = (unsigned long)miso,
-		.delay_usecs = 1,
-		.len = 1,
+	struct spi_ioc_transfer tr[20] = 
+	{
+		{
+			.tx_buf = (unsigned long)mosi,
+			.rx_buf = (unsigned long)miso,
+			.delay_usecs = 0,
+			.len = 7,
+			.cs_change = 1,
+		},
+				{
+			.tx_buf = (unsigned long)mosi,
+			.rx_buf = (unsigned long)miso,
+			.delay_usecs = 0,
+			.len = 7,
+			.cs_change = 1,
+		},
+		{
+			.tx_buf = (unsigned long)mosi,
+			.rx_buf = (unsigned long)miso,
+			.delay_usecs = 0,
+			.len = 7,
+			.cs_change = 1,
+		},
+		{
+			.tx_buf = (unsigned long)mosi,
+			.rx_buf = (unsigned long)miso,
+			.delay_usecs = 0,
+			.len = 7,
+			.cs_change = 1,
+		},
+		{
+			.tx_buf = (unsigned long)mosi,
+			.rx_buf = (unsigned long)miso,
+			.delay_usecs = 0,
+			.len = 7,
+			.cs_change = 1,
+		},
+				{
+			.tx_buf = (unsigned long)mosi,
+			.rx_buf = (unsigned long)miso,
+			.delay_usecs = 0,
+			.len = 7,
+			.cs_change = 1,
+		},
+		{
+			.tx_buf = (unsigned long)mosi,
+			.rx_buf = (unsigned long)miso,
+			.delay_usecs = 0,
+			.len = 7,
+			.cs_change = 1,
+		},
+		{
+			.tx_buf = (unsigned long)mosi,
+			.rx_buf = (unsigned long)miso,
+			.delay_usecs = 0,
+			.len = 7,
+			.cs_change = 1,
+		},
+		{
+			.tx_buf = (unsigned long)mosi,
+			.rx_buf = (unsigned long)miso,
+			.delay_usecs = 0,
+			.len = 22,
+			.cs_change = 1,
+		},
+				{
+			.tx_buf = (unsigned long)mosi,
+			.rx_buf = (unsigned long)miso,
+			.delay_usecs = 0,
+			.len = 10,
+			.cs_change = 1,
+		},
+		{
+			.tx_buf = (unsigned long)mosi,
+			.rx_buf = (unsigned long)miso,
+			.delay_usecs = 0,
+			.len = 10,
+			.cs_change = 1,
+		},
+		{
+			.tx_buf = (unsigned long)mosi,
+			.rx_buf = (unsigned long)miso,
+			.delay_usecs = 0,
+			.len = 10,
+			.cs_change = 1,
+		},
+		{
+			.tx_buf = (unsigned long)mosi,
+			.rx_buf = (unsigned long)miso,
+			.delay_usecs = 0,
+			.len = 10,
+			.cs_change = 1,
+		},
+				{
+			.tx_buf = (unsigned long)mosi,
+			.rx_buf = (unsigned long)miso,
+			.delay_usecs = 0,
+			.len = 10,
+			.cs_change = 1,
+		},
+		{
+			.tx_buf = (unsigned long)mosi,
+			.rx_buf = (unsigned long)miso,
+			.delay_usecs = 0,
+			.len = 10,
+			.cs_change = 1,
+		},
+		{
+			.tx_buf = (unsigned long)mosi,
+			.rx_buf = (unsigned long)miso,
+			.delay_usecs = 0,
+			.len = 10,
+			.cs_change = 1,
+		},
+		{
+			.tx_buf = (unsigned long)mosi,
+			.rx_buf = (unsigned long)miso,
+			.delay_usecs = 0,
+			.len = 10,
+			.cs_change = 1,
+		},
+				{
+			.tx_buf = (unsigned long)mosi,
+			.rx_buf = (unsigned long)miso,
+			.delay_usecs = 0,
+			.len = 10,
+			.cs_change = 1,
+		},
+		{
+			.tx_buf = (unsigned long)mosi,
+			.rx_buf = (unsigned long)miso,
+			.delay_usecs = 0,
+			.len = 10,
+			.cs_change = 1,
+		},
+		{
+			.tx_buf = (unsigned long)mosi,
+			.rx_buf = (unsigned long)miso,
+			.delay_usecs = 0,
+			.len = 10,
+			.cs_change = 1,
+		},	
 	};
+
+
 	char *device_name = NULL;
 	char *mosi_str = "FF";
 	int opt_i = 0;
@@ -105,6 +244,7 @@ int main(int argc, char *argv[])
 	int ret;
 	int check_changeHz = 0;
 	int changeHz;
+	int i;
 
 	static struct option long_opts[] = {
 		{ "device", required_argument, 0, 'd' },
@@ -123,13 +263,17 @@ int main(int argc, char *argv[])
 			device_name = optarg;
 			break;
 		case 'l':
-			tr.len = MIN(atoi(optarg), MAX_LENGTH);
+			// tr[0].len = MIN(atoi(optarg), MAX_LENGTH);
+			// tr[1].len = MIN(atoi(optarg), MAX_LENGTH);
 			break;
 		case 'm':
 			mosi_str = optarg;
 			break;
 		case 's':
-			tr.speed_hz = atoi(optarg);
+			for(i=0;i<20;i++)
+			{
+				tr[i].speed_hz = atoi(optarg);
+			}
 			break;
 		case 'c':
 			check_changeHz = 1;
@@ -153,54 +297,54 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	string2hex(mosi_str, mosi, tr.len);
+	//string2hex(mosi_str, mosi, tr[0].len);
 
-	printf("Sending to %s at %ld Hz\n", device_name, tr.speed_hz);	
+	printf("Sending to %s at %ld Hz\n", device_name, tr[0].speed_hz);	
 	
 	//send first
-	//for(int i=0; i<10000; i++)
+	for(int i=0; i<10000; i++)
 	{
-		ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
+		ret = ioctl(fd, SPI_IOC_MESSAGE(20), &tr);
 		if (ret == -1)
 		{
 			fprintf(stderr, "main: ioctl SPI_IOC_MESSAGE: %s: %s\n",
 				device_name, strerror(errno));
 			return ret;
 		}
+		sleep(1);
 		// else
 		// 	print_spi_transaction(miso, mosi, tr.len);
 
-		if(check_changeHz)
-		{
-			sleep(5);
-			changeHz = tr.speed_hz * 2;	
-			tr.speed_hz = changeHz;
-			// ret = ioctl(fd, SPI_IOC_WR_MAX_SPEED_HZ, &changeHz); 
-			// if (ret < 0)
-			// {
-			// 	fprintf(stderr, "main: ioctl SPI_IOC_WR_MAX_SPEED_HZ: %s: %s\n",
-			// 			device_name, strerror(errno));
-			// }
+		// if(check_changeHz)
+		// {
+		// 	sleep(5);
+		// 	changeHz = tr.speed_hz * 2;	
+		// 	tr.speed_hz = changeHz;
+		// 	// ret = ioctl(fd, SPI_IOC_WR_MAX_SPEED_HZ, &changeHz); 
+		// 	// if (ret < 0)
+		// 	// {
+		// 	// 	fprintf(stderr, "main: ioctl SPI_IOC_WR_MAX_SPEED_HZ: %s: %s\n",
+		// 	// 			device_name, strerror(errno));
+		// 	// }
+		// 	ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
+		// 	if (ret == -1)
+		// 	{
+		// 		fprintf(stderr, "main: ioctl SPI_IOC_MESSAGE: %s: %s\n",
+		// 			device_name, strerror(errno));
+		// 		return ret;
+		// 	}
+		// 	// else
+		// 	// 	print_spi_transaction(miso, mosi, tr.len);
 
-			ret = ioctl(fd, SPI_IOC_MESSAGE(1), &tr);
-			if (ret == -1)
-			{
-				fprintf(stderr, "main: ioctl SPI_IOC_MESSAGE: %s: %s\n",
-					device_name, strerror(errno));
-				return ret;
-			}
-			// else
-			// 	print_spi_transaction(miso, mosi, tr.len);
-
-			//changeHz = tr.speed_hz / 2;	
-			//tr.speed_hz = changeHz;
-			// ret = ioctl(fd, SPI_IOC_WR_MAX_SPEED_HZ, &changeHz); 
-			// if (ret < 0)
-			// {
-			// 	fprintf(stderr, "main: ioctl SPI_IOC_WR_MAX_SPEED_HZ: %s: %s\n",
-			// 			device_name, strerror(errno));
-			// }
-		}
+		// 	//changeHz = tr.speed_hz / 2;	
+		// 	//tr.speed_hz = changeHz;
+		// 	// ret = ioctl(fd, SPI_IOC_WR_MAX_SPEED_HZ, &changeHz); 
+		// 	// if (ret < 0)
+		// 	// {
+		// 	// 	fprintf(stderr, "main: ioctl SPI_IOC_WR_MAX_SPEED_HZ: %s: %s\n",
+		// 	// 			device_name, strerror(errno));
+		// 	// }
+		// }
 	}
 
 
